@@ -44,8 +44,8 @@ export default class tbClient {
 
       token = await this.api.post('/api/auth/login', { username: this.config.username, password: this.config.password })
         .then(function (response) {
-          sessionStorage.setItem('token', response.data.token)
-          sessionStorage.setItem('user', JSON.stringify(jwt(response.data.token)))
+          sessionStorage.setItem('tb_token', response.data.token)
+          sessionStorage.setItem('tb_user', JSON.stringify(jwt(response.data.token)))
           return response.data.token;
         })
         .catch(function (error) {
@@ -67,19 +67,17 @@ export default class tbClient {
 
 
   //disconnect
-  disconnect(params){
-    sessionStorage.removeItem('token');
-    sessionStorage.removeItem('devices');
-    sessionStorage.removeItem('user');
+  disconnect(){
+    sessionStorage.removeItem('tb_token');
+    sessionStorage.removeItem('tb_user');
     return null;
   }
 
   //get tenant devices
-  getTenantDevices(params, callback){
+  getTenantDevices(callback){
 
     return this.api.get('/api/tenant/devices?pageSize=100&page=0&sortProperty=name&sortOrder=ASC')
       .then(function (response) {
-        sessionStorage.setItem( 'devices', JSON.stringify(response.data.data) )
         callback(response.data.data);
       })
       .catch(function (error) {

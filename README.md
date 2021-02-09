@@ -25,20 +25,16 @@ npm install thingsboard-js-sdk
 
 ## Examples
 
-### Import
+### Import class
 
 ```js
-
 import tbClient from 'thingsboard-js-sdk';
 const client = new tbClient(config);
-
 ```
-
 
 ### Connect to public device
 
 ```js
-
 const client = new tbClient({
   host: 'localhost',
   publicId: 'xxx-xxx-xxx-xxx'
@@ -54,8 +50,6 @@ const connect = async () => {
 ### Connect with user/password
 
 ```js
-import tbClient from 'thingsboard-js-sdk';
-
 const client = new tbClient({
   host: 'localhost',
   username: 'username',
@@ -68,8 +62,6 @@ const connect = async () => {
 
 }
 ```
-
-
 
 ## Dev version, work in progress.
 ( documentation in progress... )
