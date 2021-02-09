@@ -3,8 +3,8 @@ import jwt from 'jwt-decode';
 
 const now = Date.now();
 
-const api = (domain, token = null) => axios.create({
-    baseURL: `https://${domain}`,
+const api = (host, token = null) => axios.create({
+    baseURL: `https://${host}`,
     responseType: "json",
     headers: {
       'X-Authorization': `Bearer ${token}`
@@ -16,10 +16,10 @@ export default class tbClient {
   constructor(config){
 
     this.config = config;
-    this.api = api(config.domain, config.token);
+    this.api = api(config.host, config.token);
 
     if(config.token){
-        this.token = config.token;
+      this.token = config.token;
     } else {
       this.token = null;
     }
@@ -30,7 +30,7 @@ export default class tbClient {
   // //connect and return public token from Thingsboard
   async connect(){
 
-    const token = await axios.post('https://'+this.config.domain+'/api/auth/login/public', { publicId: this.config.publicId })
+    const token = await axios.post('https://'+this.config.host+'/api/auth/login/public', { publicId: this.config.publicId })
       .then(function (response) {
         return response.data.token;
       })
@@ -40,7 +40,7 @@ export default class tbClient {
 
     if(token){
       this.token = token;
-      this.api = api(this.config.domain, token);
+      this.api = api(this.config.host, token);
       return token;
     } else {
       return null;
@@ -52,7 +52,7 @@ export default class tbClient {
   //connect and return public token from Thingsboard
   async authCustomer(){
 
-    const token = await axios.post('https://'+this.config.domain+'/api/auth/login', { username: this.config.username, password: this.config.password })
+    const token = await axios.post('https://'+this.config.host+'/api/auth/login', { username: this.config.username, password: this.config.password })
       .then(function (response) {
         sessionStorage.setItem('token', response.data.token)
         sessionStorage.setItem('user', JSON.stringify(jwt(response.data.token)))
@@ -65,7 +65,7 @@ export default class tbClient {
 
       if(token){
         this.token = token;
-        this.api = api(this.config.domain, token);
+        this.api = api(this.config.host, token);
         return token;
       } else {
         return null;
@@ -89,7 +89,7 @@ export default class tbClient {
   //get customer devices
   // getDevices(params, callback) => {
   //
-  //   return this.api.get('https://'+this.config.domain+'/api/customer/'+params.customerId+"/devices?pageSize=10&page=0&sortProperty=createdTime&sortOrder=DESC")
+  //   return this.api.get('https://'+this.config.host+'/api/customer/'+params.customerId+"/devices?pageSize=10&page=0&sortProperty=createdTime&sortOrder=DESC")
   //     .then(function (response) {
   //       sessionStorage.setItem( 'devices', JSON.stringify(response.data.data) )
   //       callback(response.data.data);
@@ -124,7 +124,7 @@ export default class tbClient {
     */
     const keysFunction = (params) => {
 
-      return this.api.get('https://'+this.config.domain+'/api/plugins/telemetry/DEVICE/'+params.entityId+'/keys/'+params.scope)
+      return this.api.get('https://'+this.config.host+'/api/plugins/telemetry/DEVICE/'+params.entityId+'/keys/'+params.scope)
         .then(function (response) {
           //console.log(params.scope, response.data)
           callback(response.data);
@@ -176,7 +176,7 @@ export default class tbClient {
       }
     */
 
-    return this.api.get('https://'+this.config.domain+'/api/plugins/telemetry/DEVICE/'+params.entityId+'/values/attributes/'+params.scope+"?keys="+params.keys.join(','))
+    return this.api.get('https://'+this.config.host+'/api/plugins/telemetry/DEVICE/'+params.entityId+'/values/attributes/'+params.scope+"?keys="+params.keys.join(','))
       .then(function (response) {
         //console.log(params.scope, response.data)
         callback(response.data);
@@ -208,7 +208,7 @@ export default class tbClient {
       return null;
     }
 
-    const baseUrl = 'https://'+this.config.domain+'/api/plugins/telemetry/DEVICE/'+params.entityId;
+    const baseUrl = 'https://'+this.config.host+'/api/plugins/telemetry/DEVICE/'+params.entityId;
     let url;
 
 
@@ -265,7 +265,7 @@ export default class tbClient {
   //websocket
   subscribe(params, callback){
 
-    const wssUrl = "wss://"+this.config.domain+"/api/ws/plugins/telemetry?token=" + this.token;
+    const wssUrl = "wss://"+this.config.host+"/api/ws/plugins/telemetry?token=" + this.token;
     var webSocket = new WebSocket(wssUrl);
 
     webSocket.onopen = function () {
@@ -300,7 +300,7 @@ export default class tbClient {
   }
 
 
-  getTelemetry(parameters, callback){
+  getTimeseries(parameters, callback){
 
     const params = {
       keys: parameters.keys,
@@ -371,9 +371,7 @@ export default class tbClient {
 
     try {
 
-        var thisMonthValues = await this.getTelemetry(parameters, function (data){
-
-        //console.log('thisMonthValues', data)
+        var thisMonthValues = await this.getTimeseries(parameters, function (data){
 
         const en = data.energy;
 
