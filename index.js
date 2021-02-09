@@ -1,8 +1,6 @@
 import axios from 'axios';
 import jwt from 'jwt-decode';
 
-const now = Date.now();
-
 const api = (host, token = null) => axios.create({
     baseURL: `https://${host}`,
     responseType: "json",
@@ -10,6 +8,7 @@ const api = (host, token = null) => axios.create({
       'X-Authorization': `Bearer ${token}`
     }
 });
+
 
 export default class tbClient {
 
@@ -24,19 +23,37 @@ export default class tbClient {
       this.token = null;
     }
 
-
   }
 
-  // //connect and return public token from Thingsboard
-  async connect(){
+  // connect to Thingsboard
+  async connect(public = false){
 
-    const token = await axios.post('https://'+this.config.host+'/api/auth/login/public', { publicId: this.config.publicId })
-      .then(function (response) {
-        return response.data.token;
-      })
-      .catch(function (error) {
-        return null;
-      });
+    let token;
+
+    if(public === true){
+
+      token = await this.api.post('/api/auth/login/public', { publicId: this.config.publicId })
+        .then(function (response) {
+          return response.data.token;
+        })
+        .catch(function (error) {
+          return null;
+        });
+
+    } else {
+
+      token = await this.api.post('/api/auth/login', { username: this.config.username, password: this.config.password })
+        .then(function (response) {
+          sessionStorage.setItem('token', response.data.token)
+          sessionStorage.setItem('user', JSON.stringify(jwt(response.data.token)))
+          return response.data.token;
+        })
+        .catch(function (error) {
+          console.error(error)
+          return null;
+        });
+
+    }
 
     if(token){
       this.token = token;
@@ -46,59 +63,16 @@ export default class tbClient {
       return null;
     }
 
-
   }
 
-  //connect and return public token from Thingsboard
-  async authCustomer(){
-
-    const token = await axios.post('https://'+this.config.host+'/api/auth/login', { username: this.config.username, password: this.config.password })
-      .then(function (response) {
-        sessionStorage.setItem('token', response.data.token)
-        sessionStorage.setItem('user', JSON.stringify(jwt(response.data.token)))
-        return response.data.token;
-      })
-      .catch(function (error) {
-        console.error(error)
-        return null;
-      });
-
-      if(token){
-        this.token = token;
-        this.api = api(this.config.host, token);
-        return token;
-      } else {
-        return null;
-      }
-
-  }
 
   //disconnect
   disconnect(params){
-
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('devices');
     sessionStorage.removeItem('user');
     return null;
-
   }
-
-
-
-
-  //get customer devices
-  // getDevices(params, callback) => {
-  //
-  //   return this.api.get('https://'+this.config.host+'/api/customer/'+params.customerId+"/devices?pageSize=10&page=0&sortProperty=createdTime&sortOrder=DESC")
-  //     .then(function (response) {
-  //       sessionStorage.setItem( 'devices', JSON.stringify(response.data.data) )
-  //       callback(response.data.data);
-  //     })
-  //     .catch(function (error) {
-  //       callback(null);
-  //     });
-  // }
-
 
   //get tenant devices
   getTenantDevices(params, callback){
@@ -113,7 +87,7 @@ export default class tbClient {
       });
   }
 
-
+  //get timeseries keys|attributes keys
   async getKeys(params, callback){
 
     /*
@@ -124,7 +98,7 @@ export default class tbClient {
     */
     const keysFunction = (params) => {
 
-      return this.api.get('https://'+this.config.host+'/api/plugins/telemetry/DEVICE/'+params.entityId+'/keys/'+params.scope)
+      return this.api.get(`/api/plugins/telemetry/DEVICE/${params.entityId}/keys/${params.scope}`)
         .then(function (response) {
           //console.log(params.scope, response.data)
           callback(response.data);
@@ -176,7 +150,7 @@ export default class tbClient {
       }
     */
 
-    return this.api.get('https://'+this.config.host+'/api/plugins/telemetry/DEVICE/'+params.entityId+'/values/attributes/'+params.scope+"?keys="+params.keys.join(','))
+    return this.api.get(`/api/plugins/telemetry/DEVICE/${params.entityId}/values/attributes/${params.scope}?keys=${params.keys.join(',')}`)
       .then(function (response) {
         //console.log(params.scope, response.data)
         callback(response.data);
@@ -221,7 +195,7 @@ export default class tbClient {
         } else {
 
           const startTs = 0;
-          const endTs = now - (olderThan*1000);
+          const endTs = Date.now() - (olderThan*1000);
           url = `${baseUrl}/timeseries/delete?keys=${params.keys.join(',')}&startTs=${startTs}&endTs=${endTs}&&deleteAllDataForKeys=false`;
 
         }
@@ -265,7 +239,7 @@ export default class tbClient {
   //websocket
   subscribe(params, callback){
 
-    const wssUrl = "wss://"+this.config.host+"/api/ws/plugins/telemetry?token=" + this.token;
+    const wssUrl = `wss://${this.config.host}/api/ws/plugins/telemetry?token=${this.token}`;
     var webSocket = new WebSocket(wssUrl);
 
     webSocket.onopen = function () {
@@ -302,6 +276,8 @@ export default class tbClient {
 
   getTimeseries(parameters, callback){
 
+    const now = Date.now();
+
     const params = {
       keys: parameters.keys,
       limit: parameters.limit || 500,
@@ -315,7 +291,7 @@ export default class tbClient {
 
 
     return this.api.get(
-      '/api/plugins/telemetry/DEVICE/'+parameters.entityId+'/values/timeseries',
+      `/api/plugins/telemetry/DEVICE/${parameters.entityId}/values/timeseries`,
       { params: params })
       .then(function (response) {
         callback(response.data);
@@ -332,12 +308,12 @@ export default class tbClient {
 
   async energyEstimation(params, callback){
 
-    var now = Date.now();
-    var date = new Date();
-    var minutes = date.getMinutes();
-    var month = date.getMonth();
-    var year = date.getFullYear();
-    var day = date.getDate();
+    const now = Date.now();
+    const date = new Date();
+    const minutes = date.getMinutes();
+    const month = date.getMonth();
+    const year = date.getFullYear();
+    const day = date.getDate();
 
     if(day < 3){
       console.log('Estimated using past month data');
@@ -375,31 +351,25 @@ export default class tbClient {
 
         const en = data.energy;
 
-        var first = en[0];
-        var last = en.pop();
+        const first = en[0];
+        const last = en.pop();
 
-        var monthInMs = 30 * 24 * 60 * 60 * 1000;
-        var dayInMs = 24 * 60 * 60 * 1000;
+        const monthInMs = 30 * 24 * 60 * 60 * 1000;
+        const dayInMs = 24 * 60 * 60 * 1000;
 
-        var period = last.ts - first.ts;
-        var energy = last.value - first.value;
+        const period = last.ts - first.ts;
+        const energy = last.value - first.value;
 
         var estimation = [];
-
         estimation.first = first;
         estimation.last = last;
         estimation.energy = Math.round( (energy*monthInMs/period), 0);
         estimation.costs = Math.round( (estimation.energy * 3000), 0);
 
-        //console.log('ESTIMATION', estimation);
-
         callback(estimation);
         return estimation;
 
-
       });
-
-
 
     } catch (e) {
       callback(null);
