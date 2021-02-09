@@ -1,0 +1,22 @@
+{
+  "name": "thingsboard-js-sdk",
+  "version": "0.0.2",
+  "description": "Thingsboard SDK for Javascript",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@gitlab.acte.solutions:npm/thingsboard-js-sdk.git"
+  },
+  "keywords": [
+    "thingsboard"
+  ],
+  "author": "ACTE Technology Co., Ltd.",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "jwt-decode": "^3.1.2"
+  }
+}
