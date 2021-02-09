@@ -23,6 +23,53 @@ npm install thingsboard-js-sdk
 - getTimeseries
 - energyEstimation
 
+## Examples
+
+### Import
+
+```js
+
+import tbClient from 'thingsboard-js-sdk';
+const client = new tbClient(config);
+
+```
+
+
+### Connect to public device
+
+```js
+
+const client = new tbClient({
+  host: 'localhost',
+  publicId: 'xxx-xxx-xxx-xxx'
+});
+
+const connect = async () => {
+
+  const token = await client.connect(true); //true for public login
+
+}
+```
+
+### Connect with user/password
+
+```js
+import tbClient from 'thingsboard-js-sdk';
+
+const client = new tbClient({
+  host: 'localhost',
+  username: 'username',
+  password: 'password'
+});
+
+const connect = async () => {
+
+  const token = await client.connect();
+
+}
+```
+
+
 
 ## Dev version, work in progress.
 ( documentation in progress... )
