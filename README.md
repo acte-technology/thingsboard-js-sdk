@@ -12,8 +12,7 @@ npm install thingsboard-js-sdk
 ## Methods
 
 - Constructor class (host, token)
-- Connect (publicId)
-- Auth (user/password)
+- Connect
 - Disconnect
 - Subscribe (websocket)
 - getTenantDevices
@@ -22,6 +21,7 @@ npm install thingsboard-js-sdk
 - getAttributesByScope
 - getTimeseries
 - energyEstimation
+
 
 ## Examples
 

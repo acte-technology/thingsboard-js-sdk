@@ -11,7 +11,8 @@
     "url": "git@gitlab.acte.solutions:npm/thingsboard-js-sdk.git"
   },
   "keywords": [
-    "thingsboard"
+    "thingsboard",
+    "IoT"
   ],
   "author": "ACTE Technology Co., Ltd.",
   "license": "MIT",
