@@ -26,11 +26,11 @@ export default class tbClient {
   }
 
   // connect to Thingsboard
-  async connect(public = false){
+  async connect(isPublic = false){
 
     let token;
 
-    if(public === true){
+    if(isPublic === true){
 
       token = await this.api.post('/api/auth/login/public', { publicId: this.config.publicId })
         .then(function (response) {
