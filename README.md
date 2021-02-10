@@ -13,10 +13,9 @@ npm install thingsboard-js-sdk
 
 ## Methods
 
-- Constructor class (host, token)
-- Connect
-- Disconnect
-- Subscribe (websocket)
+- connect
+- disconnect
+- subscribe (websocket)
 - getTenantDevices
 - getKeys (timeseries & attributes)
 - deleteEntityKeys (timeseries & attributes)
@@ -24,10 +23,7 @@ npm install thingsboard-js-sdk
 - getTimeseries
 - energyEstimation
 
-
-## Examples
-
-### Import class
+### Import client class
 
 ```js
 import tbClient from 'thingsboard-js-sdk';
@@ -65,7 +61,7 @@ const connect = async () => {
 }
 ```
 
-## Get Tenant Devices
+### Get Tenant Devices
 
 *must be logged as a tenant*
 
@@ -80,7 +76,7 @@ const params = {
 let devices = await client.getTenantDevices(params, callback)
 ```
 
-## Get Keys
+### Get Keys
 
 ```js
 const params = {
@@ -91,7 +87,7 @@ const params = {
 let keys = await client.getKeys(params, callback)
 ```
 
-## Get Attributes By Scope
+### Get Attributes By Scope
 
 ```js
 const params = {
@@ -103,7 +99,7 @@ const params = {
 let attrs = await client.getAttributesByScope(params, callback)
 ```
 
-## Delete keys
+### Delete keys
 
 ```js
 const params = {
@@ -116,7 +112,7 @@ const params = {
 let response = await client.deleteEntityKeys(params, callback)
 ```
 
-## Get timeseries
+### Get timeseries
 
 ```js
 const now = Date.now();
@@ -136,7 +132,7 @@ let timeseries = await client.getTimeseries(params, callback)
 ```
 
 
-## WSS Websocket subscribe
+### WSS Websocket subscribe
 
 ```js
 const params = {
