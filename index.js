@@ -241,17 +241,18 @@ export default class tbClient {
     const endTs = params.endTs || now;
     const useStrictDataTypes = params.useStrictDataTypes || true;
 
+    const getParams = {
+      keys: keys.join(','),
+      limit: limit,
+      agg: agg,
+      interval: interval,
+      startTs: startTs,
+      endTs: endTs,
+      useStrictDataTypes: useStrictDataTypes
+    }
+
     return this.api.get(
-      `/api/plugins/telemetry/DEVICE/${entityId}/values/timeseries`,
-      {
-        keys: keys,
-        limit: limit,
-        agg: agg,
-        interval: interval,
-        startTs: startTs,
-        endTs: endTs,
-        useStrictDataTypes: useStrictDataTypes
-      })
+      `/api/plugins/telemetry/DEVICE/${entityId}/values/timeseries`, {params: getParams})
       .then(function (response) {
         callback(response.data);
         return response.data;
@@ -336,7 +337,7 @@ export default class tbClient {
     }
 
     var parameters = {
-      keys: 'energy',
+      keys: ['energy'],
       limit: 100,
       agg: 'MIN',
       interval: interval,
