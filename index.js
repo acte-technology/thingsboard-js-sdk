@@ -173,40 +173,36 @@ export default class tbClient {
   async deleteEntityKeys(params, callback){
 
     const entityId = params.entityId;
-    const keys = params.keys;
-
-    const olderThan = Number(params.olderThan);
-    if(params.olderThan === null){
-      alert('Older Than must be set');
-      return null;
-    }
+    const keys = params.keys || [];
+    const scope = params.scope || "";
+    const olderThan = Number(params.olderThan || 0); //timestamp seconds
 
     //using fetch for delete method, had issues with testing server using axios. OPTIONS.
     const baseUrl = `https://${this.config.host}/api/plugins/telemetry/DEVICE/${entityId}`;
     let url;
 
-    switch (params.scope) {
+    switch (scope) {
       case 'timeseries':
         if(olderThan === 0){
 
-          url = `${baseUrl}/timeseries/delete?keys=${params.keys.join(',')}&deleteAllDataForKeys=true`;
+          url = `${baseUrl}/timeseries/delete?keys=${keys.join(',')}&deleteAllDataForKeys=true`;
 
         } else {
 
           const startTs = 0;
           const endTs = Date.now() - (olderThan*1000);
-          url = `${baseUrl}/timeseries/delete?keys=${params.keys.join(',')}&startTs=${startTs}&endTs=${endTs}&&deleteAllDataForKeys=false`;
+          url = `${baseUrl}/timeseries/delete?keys=${keys.join(',')}&startTs=${startTs}&endTs=${endTs}&&deleteAllDataForKeys=false`;
 
         }
         break;
       case 'client':
-        url = `${baseUrl}/CLIENT_SCOPE?keys=${params.keys.join(',')}`;
+        url = `${baseUrl}/CLIENT_SCOPE?keys=${keys.join(',')}`;
         break;
       case 'shared':
-        url = `${baseUrl}/SHARED_SCOPE?keys=${params.keys.join(',')}`;
+        url = `${baseUrl}/SHARED_SCOPE?keys=${keys.join(',')}`;
         break;
       case 'server':
-        url = `${baseUrl}/SERVER_SCOPE?keys=${params.keys.join(',')}`;
+        url = `${baseUrl}/SERVER_SCOPE?keys=${keys.join(',')}`;
         break;
       default:
         console.error('Unrecognized scope');

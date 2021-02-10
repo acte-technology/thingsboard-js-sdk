@@ -108,8 +108,9 @@ let attrs = await client.getAttributesByScope(params, callback)
 ```js
 const params = {
   entityId: 'xxx-xxx-xxx',
-  keys: ['temperature', 'humidity']
-  olderThan: 3600 //seconds
+  keys: ['temperature', 'humidity'],
+  olderThan: Date.now()-3600, //delete older than 1 hour
+  scope: 'timeseries' // timeseries, client, shared, server
 }
 //...
 let response = await client.deleteEntityKeys(params, callback)
