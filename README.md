@@ -4,6 +4,7 @@ Thingsboard Javascript SDK
 
 **Dev version, work in progress.**
 
+Use example: https://acte.ltd/iot/client/login
 
 ## Installation
 
