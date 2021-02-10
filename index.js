@@ -74,9 +74,14 @@ export default class tbClient {
   }
 
   //get tenant devices
-  getTenantDevices(callback){
+  getTenantDevices(params, callback){
 
-    return this.api.get('/api/tenant/devices?pageSize=100&page=0&sortProperty=name&sortOrder=ASC')
+    const pageSize = params.pageSize || 100;
+    const page = params.page || 0;
+    const sortProperty = params.sortProperty || 'name';
+    const sortOrder = params.sortOrder || 'ASC'
+
+    return this.api.get(`/api/tenant/devices?pageSize=${pageSize}&page=${page}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`)
       .then(function (response) {
         callback(response.data.data);
       })
@@ -88,17 +93,21 @@ export default class tbClient {
   //get timeseries keys|attributes keys
   async getKeys(params, callback){
 
-    /*
-      params = {
-        entityId,
-        scope (telemetries|attributes)
-      }
-    */
-    const keysFunction = (params) => {
+    const entityId = params.entityId;
 
-      return this.api.get(`/api/plugins/telemetry/DEVICE/${params.entityId}/keys/${params.scope}`)
+    if(!entityId){
+      console.error('entityId is undefined');
+      return null;
+      callback(null);
+    }
+
+    const scope = params.scope || 'timeseries';
+
+
+    const keysFunction = (args) => {
+
+      return this.api.get(`/api/plugins/telemetry/DEVICE/${args.entityId}/keys/${args.scope}`)
         .then(function (response) {
-          //console.log(params.scope, response.data)
           callback(response.data);
           return response.data
         })
@@ -108,7 +117,7 @@ export default class tbClient {
         });
     }
 
-    switch (params.scope) {
+    switch (scope) {
 
       case 'client':
         params.scope = 'attributes/CLIENT_SCOPE';
@@ -132,25 +141,25 @@ export default class tbClient {
 
     }
 
-
-
-
   }
 
 
+  //get attributes by scope
   getAttributesByScope(params, callback){
 
-    /*
-      params = {
-        entityId,
-        scope (CLIENT_SCOPE|SHARED_SCOPE|SERVER_SCOPE),
-        keys array
-      }
-    */
+    // params.scope: CLIENT_SCOPE | SHARED_SCOPE | SERVER_SCOPE
 
-    return this.api.get(`/api/plugins/telemetry/DEVICE/${params.entityId}/values/attributes/${params.scope}?keys=${params.keys.join(',')}`)
+    const entityId = params.entityId;
+    if(!entityId){
+      console.log('undefined entityId')
+      callback(null);
+      return null;
+    }
+
+    const scope = params.scope || 'CLIENT_SCOPE';
+
+    return this.api.get(`/api/plugins/telemetry/DEVICE/${params.entityId}/values/attributes/${scope}?keys=${params.keys.join(',')}`)
       .then(function (response) {
-        //console.log(params.scope, response.data)
         callback(response.data);
         return response.data
       })
@@ -161,34 +170,26 @@ export default class tbClient {
   }
 
 
-
   async deleteEntityKeys(params, callback){
 
-    /*
-      params = {
-          entityId,
-          keys,
-          scope,
-          olderThan (seconds)
-      }
-    */
+    const entityId = params.entityId;
+    const keys = params.keys;
 
     const olderThan = Number(params.olderThan);
-
     if(params.olderThan === null){
       alert('Older Than must be set');
       return null;
     }
 
-    const baseUrl = 'https://'+this.config.host+'/api/plugins/telemetry/DEVICE/'+params.entityId;
+    //using fetch for delete method, had issues with testing server using axios. OPTIONS.
+    const baseUrl = `https://${this.config.host}/api/plugins/telemetry/DEVICE/${entityId}`;
     let url;
-
 
     switch (params.scope) {
       case 'timeseries':
         if(olderThan === 0){
 
-          url = baseUrl+'/timeseries/delete?keys='+params.keys.join(',')+'&deleteAllDataForKeys=true';
+          url = `${baseUrl}/timeseries/delete?keys=${params.keys.join(',')}&deleteAllDataForKeys=true`;
 
         } else {
 
@@ -199,19 +200,18 @@ export default class tbClient {
         }
         break;
       case 'client':
-        url = baseUrl+'/CLIENT_SCOPE?keys='+params.keys.join(',');
+        url = `${baseUrl}/CLIENT_SCOPE?keys=${params.keys.join(',')}`;
         break;
       case 'shared':
-        url = baseUrl+'/SHARED_SCOPE?keys='+params.keys.join(',');
+        url = `${baseUrl}/SHARED_SCOPE?keys=${params.keys.join(',')}`;
         break;
       case 'server':
-        url = baseUrl+'/SERVER_SCOPE?keys='+params.keys.join(',');
+        url = `${baseUrl}/SERVER_SCOPE?keys=${params.keys.join(',')}`;
         break;
       default:
         console.error('Unrecognized scope');
         return null;
     }
-
 
     try {
 
@@ -233,9 +233,47 @@ export default class tbClient {
 
   }
 
+  getTimeseries(params, callback){
+
+    const now = Date.now();
+    const entityId = params.entityId;
+    const keys = params.keys || [];
+    const limit = params.limit || 500;
+    const agg = params.agg || 'AVG';
+    const interval = params.interval || 60000;
+    const startTs = params.startTs || now-3600000;
+    const endTs = params.endTs || now;
+    const useStrictDataTypes = params.useStrictDataTypes || true;
+
+    return this.api.get(
+      `/api/plugins/telemetry/DEVICE/${entityId}/values/timeseries`,
+      {
+        keys: keys,
+        limit: limit,
+        agg: agg,
+        interval: interval,
+        startTs: startTs,
+        endTs: endTs,
+        useStrictDataTypes: useStrictDataTypes
+      })
+      .then(function (response) {
+        callback(response.data);
+        return response.data;
+      })
+      .catch(function (error) {
+        console.log(error);
+        callback(null);
+        return null;
+      });
+
+  }
+
 
   //websocket
   subscribe(params, callback){
+
+    const entityId = params.entityId;
+    const cmdId = params.cmdId || 10;
 
     const wssUrl = `wss://${this.config.host}/api/ws/plugins/telemetry?token=${this.token}`;
     var webSocket = new WebSocket(wssUrl);
@@ -245,9 +283,9 @@ export default class tbClient {
           tsSubCmds: [
             {
               entityType: "DEVICE",
-              entityId: params.entityId,
+              entityId: entityId,
               scope: "LATEST_TELEMETRY",
-              cmdId: params.cmdId
+              cmdId: cmdId
             }
           ],
           historyCmds: [],
@@ -268,38 +306,6 @@ export default class tbClient {
         webSocket = null;
         callback(null);
     };
-
-  }
-
-
-  getTimeseries(parameters, callback){
-
-    const now = Date.now();
-
-    const params = {
-      keys: parameters.keys,
-      limit: parameters.limit || 500,
-      agg: parameters.agg || 'AVG',
-      interval: parameters.interval || 60000,
-      startTs: parameters.startTs || now-3600000,
-      endTs: parameters.endTs || now,
-      //raw: parameters.raw || false,
-      useStrictDataTypes: true
-    };
-
-
-    return this.api.get(
-      `/api/plugins/telemetry/DEVICE/${parameters.entityId}/values/timeseries`,
-      { params: params })
-      .then(function (response) {
-        callback(response.data);
-        return response.data;
-      })
-      .catch(function (error) {
-        console.log(error);
-        callback(null);
-        return null;
-      });
 
   }
 

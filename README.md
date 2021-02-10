@@ -2,6 +2,8 @@
 
 Thingsboard Javascript SDK
 
+**Dev version, work in progress.**
+
 
 ## Installation
 
@@ -63,5 +65,83 @@ const connect = async () => {
 }
 ```
 
-## Dev version, work in progress.
-( documentation in progress... )
+## Get Tenant Devices
+
+*must be logged as a tenant*
+
+```js
+const params = {
+  pageSize: 100,
+  page: 0,
+  sortProperty: 'name',
+  sortOrder: 'ASC'
+}
+//...
+let devices = await client.getTenantDevices(params, callback)
+```
+
+## Get Keys
+
+```js
+const params = {
+  entityId: 'xxx-xxx-xxx',
+  scope: 'timeseries', //timeseries | client | shared | server
+}
+//...
+let keys = await client.getKeys(params, callback)
+```
+
+## Get Attributes By Scope
+
+```js
+const params = {
+  entityId: 'xxx-xxx-xxx',
+  scope: 'CLIENT_SCOPE', // CLIENT_SCOPE | SHARED_SCOPE | SERVER_SCOPE
+  keys: ['temperature', 'humidity']
+}
+//...
+let attrs = await client.getAttributesByScope(params, callback)
+```
+
+## Delete keys
+
+```js
+const params = {
+  entityId: 'xxx-xxx-xxx',
+  keys: ['temperature', 'humidity']
+  olderThan: 3600 //seconds
+}
+//...
+let response = await client.deleteEntityKeys(params, callback)
+```
+
+## Get timeseries
+
+```js
+const now = Date.now();
+
+const params = {
+  entityId: 'xxx-xxx-xxx',
+  keys: ['temperature', 'humidity']
+  limit: 500,
+  agg: 'AVG',
+  interval: 60000,
+  startTs: now-3600000,
+  endTs: now,
+  useStrictDataTypes: true
+}
+//...
+let timeseries = await client.getTimeseries(params, callback)
+```
+
+
+## WSS Websocket subscribe
+
+```js
+const params = {
+  entityId: 'xxx-xxx-xxx',
+  cmdId: 10 //websocket id
+}
+//...
+let keys = await client.subscribe(params, callback)
+```
