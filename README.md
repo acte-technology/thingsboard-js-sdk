@@ -4,13 +4,16 @@ Thingsboard Javascript SDK
 
 **Dev version, work in progress.**
 
-Use example: https://acte.ltd/iot/client/login
-
 ## Installation
 
 ```bash
 npm install thingsboard-js-sdk
 ```
+
+## Examples
+
+* Reactjs, checkout docs/reactjs.js component.
+
 
 ## Methods
 
@@ -132,7 +135,6 @@ const params = {
 let timeseries = await client.getTimeseries(params, callback)
 ```
 
-
 ### WSS Websocket subscribe
 
 ```js
@@ -143,3 +145,7 @@ const params = {
 //...
 let keys = await client.subscribe(params, callback)
 ```
+
+## Issues
+
+Github: https://github.com/acte-solutions/thingsboard-js-sdk/issues
