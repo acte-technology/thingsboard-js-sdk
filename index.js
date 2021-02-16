@@ -2,7 +2,7 @@ import axios from 'axios';
 import jwt from 'jwt-decode';
 
 const api = (host, token = null) => axios.create({
-    baseURL: `https://${host}`,
+    baseURL: host,
     responseType: "json",
     headers: {
       'X-Authorization': `Bearer ${token}`
@@ -34,6 +34,7 @@ export default class tbClient {
 
       token = await this.api.post('/api/auth/login/public', { publicId: this.config.publicId })
         .then(function (response) {
+          sessionStorage.setItem('tb_token', response.data.token)
           return response.data.token;
         })
         .catch(function (error) {

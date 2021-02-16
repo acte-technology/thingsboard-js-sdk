@@ -45,6 +45,8 @@ const client = new tbClient({
 const connect = async () => {
 
   const token = await client.connect(true); //true for public login
+  //"tb_token" stored in session storage (String)
+
 
 }
 ```
@@ -61,6 +63,8 @@ const client = new tbClient({
 const connect = async () => {
 
   const token = await client.connect();
+  //"tb_token" stored in session storage (String)
+  //"tb_user" stored in session storage (JSON)
 
 }
 ```
