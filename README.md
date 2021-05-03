@@ -148,4 +148,4 @@ let keys = await client.subscribe(params, callback)
 
 ## Issues
 
-Github: https://github.com/acte-solutions/thingsboard-js-sdk/issues
+Github: https://github.com/acte-technology/thingsboard-js-sdk/issues
