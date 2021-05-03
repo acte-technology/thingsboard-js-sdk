@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/acte-solutions/thingsboard-js-sdk.git"
+    "url": "https://github.com/acte-technology/thingsboard-js-sdk.git"
   },
   "keywords": [
     "thingsboard",
@@ -27,9 +27,9 @@
     "url": "https://acte.ltd"
     }
   ],
-  "homepage": "https://github.com/acte-solutions/thingsboard-js-sdk.git",
+  "homepage": "https://github.com/acte-technology/thingsboard-js-sdk.git",
   "bugs": {
-  "url": "https://github.com/acte-solutions/thingsboard-js-sdk/issues"
+  "url": "https://github.com/acte-technology/thingsboard-js-sdk/issues"
   },
   "license": "MIT",
   "dependencies": {
