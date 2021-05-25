@@ -25,7 +25,6 @@ npm install thingsboard-js-sdk
 - deleteEntityKeys (timeseries & attributes)
 - getAttributesByScope
 - getTimeseries
-- energyEstimation
 
 ### Import client class
 
