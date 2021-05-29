@@ -1,5 +1,5 @@
-import axios from 'axios';
-import jwt from 'jwt-decode';
+const axios = require('axios').default;
+const jwt = require('jwt-decode').default;
 
 const api = (host, token = null) => axios.create({
     baseURL: `https://${host}`,
@@ -10,7 +10,7 @@ const api = (host, token = null) => axios.create({
 });
 
 
-export default class tbClient {
+class tbClient{
 
   constructor(config){
 
@@ -307,3 +307,6 @@ export default class tbClient {
   }
 
 }
+
+
+module.exports = tbClient;

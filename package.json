@@ -18,19 +18,19 @@
   "author": "ACTE Technology Co., Ltd.",
   "contributors": [
     {
-    "name": "ACTE Technology Co., Ltd.",
-    "email": "contact@acte.ltd",
-    "url": "https://acte.ltd"
+      "name": "ACTE Technology Co., Ltd.",
+      "email": "contact@acte.ltd",
+      "url": "https://acte.ltd"
     },
     {
-    "name": "Adrien Baltardive",
-    "email": "adrien@acte.ltd",
-    "url": "https://acte.ltd"
+      "name": "Adrien Baltardive",
+      "email": "adrien@acte.ltd",
+      "url": "https://acte.ltd"
     }
   ],
   "homepage": "https://github.com/acte-technology/thingsboard-js-sdk.git",
   "bugs": {
-  "url": "https://github.com/acte-technology/thingsboard-js-sdk/issues"
+    "url": "https://github.com/acte-technology/thingsboard-js-sdk/issues"
   },
   "license": "MIT",
   "dependencies": {
