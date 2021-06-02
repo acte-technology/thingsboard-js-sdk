@@ -4,13 +4,15 @@ import tbClient from 'thingsboard-js-sdk';
 
 //tb server config
 const config = {
-  host: "localhost",
+  host: "hostname",
   username: "username",
   password: "secret"
 }
 
 //init client
 const client = new tbClient(config);
+
+const now = Date.now();
 
 //device
 const device = {
