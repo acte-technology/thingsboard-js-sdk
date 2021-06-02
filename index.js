@@ -26,15 +26,21 @@ class tbClient{
   }
 
   // connect to Thingsboard
+  // return {token: token, user: user} or null
   async connect(isPublic = false){
 
-    let token;
+    let result;
 
     if(isPublic === true){
 
-      token = await this.api.post('/api/auth/login/public', { publicId: this.config.publicId })
+      result = await this.api.post('/api/auth/login/public', { publicId: this.config.publicId })
         .then(function (response) {
-          return response.data.token;
+
+          return {
+            token: response.data.token,
+            user: null
+          }
+
         })
         .catch(function (error) {
           return null;
@@ -42,11 +48,14 @@ class tbClient{
 
     } else {
 
-      token = await this.api.post('/api/auth/login', { username: this.config.username, password: this.config.password })
+      result = await this.api.post('/api/auth/login', { username: this.config.username, password: this.config.password })
         .then(function (response) {
-          sessionStorage.setItem('tb_token', response.data.token)
-          sessionStorage.setItem('tb_user', JSON.stringify(jwt(response.data.token)))
-          return response.data.token;
+
+          return {
+            token: response.data.token,
+            user: JSON.stringify(jwt(response.data.token))
+          };
+
         })
         .catch(function (error) {
           console.error(error)
@@ -55,10 +64,10 @@ class tbClient{
 
     }
 
-    if(token){
-      this.token = token;
-      this.api = api(this.config.host, token);
-      return token;
+    if(result){
+      this.token = result.token;
+      this.api = api(this.config.host, result.token);
+      return result;
     } else {
       return null;
     }
@@ -68,13 +77,12 @@ class tbClient{
 
   //disconnect
   disconnect(){
-    sessionStorage.removeItem('tb_token');
-    sessionStorage.removeItem('tb_user');
+    this.token = null;
     return null;
   }
 
   //get tenant devices
-  getTenantDevices(params, callback){
+  getTenantDevices(params = {}, callback = null){
 
     const pageSize = params.pageSize || 100;
     const page = params.page || 0;
@@ -83,22 +91,26 @@ class tbClient{
 
     return this.api.get(`/api/tenant/devices?pageSize=${pageSize}&page=${page}&sortProperty=${sortProperty}&sortOrder=${sortOrder}`)
       .then(function (response) {
-        callback(response.data.data);
+        callback && callback(response.data.data)
+        return response.data.data
+
       })
       .catch(function (error) {
-        callback(null);
+        console.log(error)
+        callback && callback(null);
+        return null;
       });
   }
 
   //get timeseries keys|attributes keys
-  async getKeys(params, callback){
+  async getKeys(params, callback = null){
 
     const entityId = params.entityId;
 
     if(!entityId){
       console.error('entityId is undefined');
+      callback && callback(null);
       return null;
-      callback(null);
     }
 
     const scope = params.scope || 'timeseries';
@@ -108,11 +120,11 @@ class tbClient{
 
       return this.api.get(`/api/plugins/telemetry/DEVICE/${args.entityId}/keys/${args.scope}`)
         .then(function (response) {
-          callback(response.data);
+          callback && callback(response.data);
           return response.data
         })
         .catch(function (error) {
-          callback(null);
+          callback && callback(null);
           return null
         });
     }
@@ -145,7 +157,7 @@ class tbClient{
 
 
   //get attributes by scope
-  getAttributesByScope(params, callback){
+  getAttributesByScope(params, callback = null){
 
     // params.scope: CLIENT_SCOPE | SHARED_SCOPE | SERVER_SCOPE
 
@@ -160,17 +172,17 @@ class tbClient{
 
     return this.api.get(`/api/plugins/telemetry/DEVICE/${params.entityId}/values/attributes/${scope}?keys=${params.keys.join(',')}`)
       .then(function (response) {
-        callback(response.data);
+        callback && callback(response.data);
         return response.data
       })
       .catch(function (error) {
-        callback(null);
+        callback && callback(null);
         return null
       });
   }
 
 
-  async deleteEntityKeys(params, callback){
+  async deleteEntityKeys(params, callback = null){
 
     const entityId = params.entityId;
     const keys = params.keys || [];
@@ -219,17 +231,19 @@ class tbClient{
           }
         });
 
-        return callback(response);
+        callback && callback(response);
+        return response;
 
     } catch (e) {
       alert(e);
+      callback && callback(null)
       return null;
     }
 
 
   }
 
-  getTimeseries(params, callback){
+  getTimeseries(params, callback = null){
 
     const now = Date.now();
     const entityId = params.entityId;
@@ -254,12 +268,12 @@ class tbClient{
     return this.api.get(
       `/api/plugins/telemetry/DEVICE/${entityId}/values/timeseries`, {params: getParams})
       .then(function (response) {
-        callback(response.data);
+        callback && callback(response.data);
         return response.data;
       })
       .catch(function (error) {
         console.log(error);
-        callback(null);
+        callback && callback(null);
         return null;
       });
 
