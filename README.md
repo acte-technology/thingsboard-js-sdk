@@ -38,7 +38,7 @@ const client = new tbClient(config);
 ```js
 const client = new tbClient({
   host: 'localhost',
-  publicId: 'xxx-xxx-xxx-xxx'
+  publicId: 'xxx-xxx-xxx-xxx' // dashboard public id
 });
 
 const connect = async () => {
@@ -148,3 +148,8 @@ let keys = await client.subscribe(params, callback)
 ## Issues
 
 Github: https://github.com/acte-technology/thingsboard-js-sdk/issues
+
+## Working examples:
+
+- Public data integration: https://acte.ltd/iot/dashboards/aqi
+- Tenant access: https://acte.ltd/iot/client/login
